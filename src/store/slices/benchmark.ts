@@ -4,9 +4,9 @@ import type { ProfilerOnRenderCallback } from 'react';
 // type ProfileResultSchedulerInteraction = Parameters<ProfilerOnRenderCallback>[6];
 // type ProfilerResult = Exclude<Parameters<ProfilerOnRenderCallback>, ProfileResultSchedulerInteraction>;
 
-type ProfilerResultParams = Parameters<ProfilerOnRenderCallback>;
+export type ProfilerResultParams = Parameters<ProfilerOnRenderCallback>;
 
-type ProfilerResult = [
+export type ProfilerResult = [
   ProfilerResultParams[0],
   ProfilerResultParams[1],
   ProfilerResultParams[2],
