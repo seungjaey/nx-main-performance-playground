@@ -6,6 +6,7 @@ const styles = {
   lottie: {
     width: '50px',
     height: '50px',
+    display: 'inline-block',
   },
 };
 
