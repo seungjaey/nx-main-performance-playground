@@ -51,6 +51,12 @@ const Home = () => {
             <li>
               <Link href="/benchmark/svg">svg loading spinner</Link>
             </li>
+            <li>
+              <Link href="/benchmark/image">{`<img> tag`}</Link>
+            </li>
+            <li>
+              <Link href="/benchmark/next-image">{`<NextImage> tag`}</Link>
+            </li>
           </ul>
         </article>
       </section>
