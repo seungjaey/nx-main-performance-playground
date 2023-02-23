@@ -1,16 +1,18 @@
 import Link from 'next/link';
 import { useDispatch } from 'react-redux';
 
-import { Profiler, ProfilerOnRenderCallback } from 'react';
+import { Profiler, ProfilerOnRenderCallback, useState } from 'react';
 
 import { LoadingSpinner } from '@/src/components/LoadingSpinner';
 import { LottieLoadingSpinner } from '@/src/components/LottieLoadingSpinner';
 import { Row } from '@/src/components/Row';
 import { addBenchmarkResult } from '@/src/store/slices/benchmark';
 import { ProfilerResult } from '@/src/components/ProfilerResult';
+import { DebugCheckWindowInnerWidth } from '@/src/components/DebugCheckWindowInnerWidth';
 
 const Home = () => {
   const dispatch = useDispatch();
+  const [toggle, setToggle] = useState(true);
   const handleProfilerRender: ProfilerOnRenderCallback = (
     id,
     phase,
@@ -25,6 +27,10 @@ const Home = () => {
   return (
     <main>
       <h1>Links..</h1>
+      <button type="button" onClick={() => setToggle((p) => !p)}>
+        test
+      </button>
+      {toggle ? <DebugCheckWindowInnerWidth /> : null}
       <section>
         <h2>lottie vs simple SVG</h2>
         <article>
