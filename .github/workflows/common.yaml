@@ -1,0 +1,135 @@
+name: kurlymall-nx common CI setup
+
+on:
+  workflow_call:
+    outputs:
+      REPOSITORY_NAME:
+        description: repository name
+        value: ${{ jobs.set_common_env_variables.outputs.REPOSITORY_NAME }}
+      PROJECT_ID:
+        description: project id
+        value: ${{ jobs.set_common_env_variables.outputs.PROJECT_ID }}
+      SHA_SHORT:
+        description: sha
+        value: ${{ jobs.set_common_env_variables.outputs.SHA_SHORT }}
+      CACHE_PACKAGES_PATH:
+        description: packages cache path
+        value: ${{ jobs.set_common_env_variables.outputs.CACHE_PACKAGES_PATH }}
+      CACHE_PACKAGES_KEY:
+        description: packages cache hash key
+        value: ${{ jobs.set_common_env_variables.outputs.CACHE_PACKAGES_KEY }}
+      COMMIT_MESSAGE:
+        description: commit message
+        value: ${{ jobs.set_common_env_variables.outputs.COMMIT_MESSAGE }}
+      RELEASE_VERSION:
+        description: commit message
+        value: ${{ jobs.set_common_env_variables.outputs.RELEASE_VERSION }}
+
+jobs:
+  set_common_env_variables:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.16.1]
+    outputs:
+      REPOSITORY_NAME: ${{ steps.set_output_repository_name.outputs.REPOSITORY_NAME }}
+      PROJECT_ID: ${{ steps.set_output_project_id.outputs.PROJECT_ID }}
+      SHA_SHORT: ${{ steps.set_output_sha_short.outputs.SHA_SHORT }}
+      COMMIT_MESSAGE: ${{ steps.set_output_commit_message.outputs.COMMIT_MESSAGE }}
+      CACHE_PACKAGES_PATH: ${{ steps.set_output_cache_packages_path.outputs.CACHE_PACKAGES_PATH }}
+      CACHE_PACKAGES_KEY: ${{ steps.set_output_cache_packages_key.outputs.CACHE_PACKAGES_KEY }}
+      RELEASE_VERSION: ${{ steps.set_output_release_version.outputs.RELEASE_VERSION }}
+    steps:
+      - name: Set Output - REPOSITORY_NAME
+        id: set_output_repository_name
+        run: |
+          REPOSITORY_NAME=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')
+          echo "REPOSITORY_NAME=$REPOSITORY_NAME" >> $GITHUB_OUTPUT
+          echo "REPOSITORY_NAME=$REPOSITORY_NAME" >> $GITHUB_ENV
+
+      - name: Set Output - PROJECT_ID
+        id: set_output_project_id
+        run: echo "PROJECT_ID=thefarmersfront_$REPOSITORY_NAME" >> $GITHUB_OUTPUT
+
+      - name: Set Output - CACHE_PACKAGES_PATH
+        id: set_output_cache_packages_path
+        run: echo "CACHE_PACKAGES_PATH=${{ github.workspace }}/node_modules" >> $GITHUB_OUTPUT
+
+      - name: Set Output - COMMIT_MESSAGE
+        id: set_output_commit_message
+        uses: actions/github-script@v6
+        with:
+          script: |
+            function getHeadCommitMessage(ctx, length = 20) {
+              const DEFAULT_MESSAGE = 'INVALID_COMMIT_MESSAGE';
+              try {
+                const {
+                  payload: {
+                    head_commit: { message }
+                  }
+                } = ctx;
+                const parsedMessage = message.replace(/[\t|\n|\v|\f|\r|\"|\'|\`|\$|]/gi, ' ').replace(/\s\s+/g, ' ');
+                const truncatedMessage = Array.from({ length })
+                  .map((_, index) => parsedMessage[index])
+                  .filter(item => item).join('');
+                  return `${truncatedMessage}...`;
+              } catch (error) {
+                return DEFAULT_MESSAGE;
+              }
+            }
+            const commitMessage = getHeadCommitMessage(context);
+            core.setOutput('COMMIT_MESSAGE', commitMessage);
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Set Output - RELEASE_VERSION
+        id: set_output_release_version
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+
+      - name: Set Output - SHA_SHORT
+        id: set_output_sha_short
+        run: echo "SHA_SHORT=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Set Output - CACHE_PACKAGES_KEY
+        id: set_output_cache_packages_key
+        run: |
+          PACKAGE_LOCK_HASH=${{ hashFiles('**/package-lock.json') }}
+          echo "CACHE_PACKAGES_KEY=${{ runner.os }}-$PACKAGE_LOCK_HASH" >> $GITHUB_OUTPUT
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache
+        id: cache_packages
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.set_output_cache_packages_path.outputs.CACHE_PACKAGES_PATH }}
+          key: ${{ steps.set_output_cache_packages_key.outputs.CACHE_PACKAGES_KEY }}
+
+      - name: Install Packages
+        if: steps.cache_packages.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Create Setup Artifact file
+        id: create_setup_artifact_file
+        run: |
+          TEMP_SETUP_RESULT_FILE_NAME=setup-result.txt
+          echo $(printenv) > $TEMP_SETUP_RESULT_FILE_NAME
+          echo "REPOSITORY_NAME=${{ steps.set_output_repository_name.outputs.REPOSITORY_NAME }}" >> $TEMP_SETUP_RESULT_FILE_NAME
+          echo "PROJECT_ID=${{ steps.set_output_project_id.outputs.PROJECT_ID }}" >> $TEMP_SETUP_RESULT_FILE_NAME
+          echo "SHA_SHORT=${{ steps.set_output_sha_short.outputs.SHA_SHORT }}" >> $TEMP_SETUP_RESULT_FILE_NAME
+          echo "COMMIT_MESSAGE=${{ steps.set_output_commit_message.outputs.COMMIT_MESSAGE }}" >> $TEMP_SETUP_RESULT_FILE_NAME
+          echo "CACHE_PACKAGES_PATH=${{ steps.set_output_cache_key_packages.outputs.CACHE_PACKAGES_PATH }}" >> $TEMP_SETUP_RESULT_FILE_NAME
+          echo "CACHE_PACKAGES_KEY=${{ steps.set_output_cache_packages_key.outputs.CACHE_PACKAGES_KEY }}" >> $TEMP_SETUP_RESULT_FILE_NAME
+          echo "RELEASE_VERSION=${{ steps.set_output_release_version.outputs.RELEASE_VERSION }}" >> $TEMP_SETUP_RESULT_FILE_NAME
+
+      - name: Upload Common Setup Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: setup-result
+          path: ./setup-result.txt
