@@ -2,6 +2,8 @@ name: ON-PR-MERGED
 
 on:
   pull_request:
+    types:
+      - closed
 
 jobs:
   setup:
