@@ -40,10 +40,21 @@ jobs:
         with:
           script: |
             console.log("About to clear")
+            console.log('${{ needs.setup.outputs.CACHE_PACKAGES_KEY }}');
+            const TARGET_CACHE_KEY = '${{ needs.setup.outputs.CACHE_PACKAGES_KEY }}';
             const caches = await github.rest.actions.getActionsCacheList({
               owner: context.repo.owner,
-              repo: context.repo.repo,
+              repo: context.repo.repo
             })
             for (const cache of caches.data.actions_caches) {
-              console.log(cache) 
+              const { id, key } = cache;
+              if (key !== '${{ needs.setup.outputs.CACHE_PACKAGES_KEY }}') {
+                continue
+              }
+              github.rest.actions.deleteActionsCacheById({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                cache_id: id,
+              })
             }
+            console.log(`target cache key "${TARGET_CACHE_KEY}" has been deleted`);
