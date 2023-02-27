@@ -5,6 +5,9 @@ on:
     types:
       - closed
 
+    workflow_dispatch:
+
+
 jobs:
   setup:
     name: Common Setup
@@ -51,7 +54,7 @@ jobs:
               if (key !== '${{ needs.setup.outputs.CACHE_PACKAGES_KEY }}') {
                 continue
               }
-              github.rest.actions.deleteActionsCacheById({
+              await github.rest.actions.deleteActionsCacheById({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 cache_id: id,
