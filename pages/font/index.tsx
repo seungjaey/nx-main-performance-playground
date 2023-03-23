@@ -1,10 +1,8 @@
+// @ts-nocheck
 import { useEffect, useState } from 'react';
 import { pipe, map, range, toArray, size, isEmpty, nth } from '@fxts/core';
 import { FixedSizeList } from 'react-window';
 
-const UnicodeChar = ({ index, style }) => {
-  return <div style={{ fontFamily: 'Noto Sans' }}>{}</div>;
-};
 const getFont = async () => {
   const font = new FontFace('Noto Sans', "url('https://res.kurly.com/fonts/NotoSansKR-Light.woff2')", {
     weight: 300,
