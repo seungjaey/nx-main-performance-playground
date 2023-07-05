@@ -8,6 +8,8 @@ import { LottieLoadingSpinner } from '@/src/components/LottieLoadingSpinner';
 import { Row } from '@/src/components/Row';
 import { addBenchmarkResult } from '@/src/store/slices/benchmark';
 import { ProfilerResult } from '@/src/components/ProfilerResult';
+import { ProductCard } from '@/src/components/ProductCard';
+import { MotionProductCard } from '@/src/components/MotionProductCard';
 
 const Home = () => {
   const dispatch = useDispatch();
@@ -43,6 +45,21 @@ const Home = () => {
           </Row>
         </article>
         <article>
+          <h3></h3>
+          <Row>
+            <Profiler id="productCard" onRender={handleProfilerRender}>
+              <ProductCard />
+            </Profiler>
+            <ProfilerResult id="productCard" />
+          </Row>
+          <Row>
+            <Profiler id="motionProductCard" onRender={handleProfilerRender}>
+              <MotionProductCard />
+            </Profiler>
+            <ProfilerResult id="motionProductCard" />
+          </Row>
+        </article>
+        <article>
           <h2>Benchmarks</h2>
           <ul>
             <li>
@@ -56,6 +73,12 @@ const Home = () => {
             </li>
             <li>
               <Link href="/benchmark/next-image">{`<NextImage> tag`}</Link>
+            </li>
+            <li>
+              <Link href="/components/product-card">product-card component</Link>
+            </li>
+            <li>
+              <Link href="/components/product-card-with-framer">product-card-with-framer</Link>
             </li>
           </ul>
         </article>

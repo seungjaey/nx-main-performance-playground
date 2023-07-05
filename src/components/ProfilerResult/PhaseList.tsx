@@ -16,7 +16,7 @@ interface Props {
 }
 
 export const PhaseList = ({ title, list }: Props) => {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const handleClick = () => setOpen((prev) => !prev);
 
   const renderList = () => {

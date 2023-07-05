@@ -4,7 +4,6 @@ import { pipe, range, size, map, toArray } from '@fxts/core';
 
 import { addBenchmarkResult } from '@/src/store/slices/benchmark';
 import { ProfilerResult } from '@/src/components/ProfilerResult';
-import { LoadingSpinner } from '@/src/components/LoadingSpinner';
 
 import TestImages from '@/src/constants/TestImages.json';
 
