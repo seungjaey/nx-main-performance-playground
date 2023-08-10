@@ -26,6 +26,10 @@ const Home = () => {
 
   return (
     <main>
+      <section>
+        <Link href="/sample">link 1</Link>
+        <Link href={`${process.env.NEXT_PUBLIC_WEB_HOST}/sample`}>Link2</Link>
+      </section>
       <h1>Links..</h1>
       <section>
         <h2>lottie vs simple SVG</h2>
