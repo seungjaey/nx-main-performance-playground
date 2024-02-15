@@ -1,12 +1,19 @@
 import axios, { CancelToken } from 'axios';
 import { ChangeEvent, useEffect, useState } from 'react';
 
-const fetchSeq = async (keyword: string, cancelToken: CancelToken) => {
+function newAbortSignal(timeoutMs: number) {
+  const abortController = new AbortController();
+  setTimeout(() => abortController.abort(), timeoutMs || 0);
+
+  return abortController.signal;
+}
+
+const fetchSeq = async (keyword: string) => {
   const { data } = await axios.get('/api/keyword', {
     params: {
       keyword,
     },
-    cancelToken,
+    signal: newAbortSignal(3000),
   });
   return data;
 };
@@ -17,15 +24,12 @@ const SearchPage = () => {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => setText(e.target.value);
 
   useEffect(() => {
-    const cancelToken = axios.CancelToken;
-    const source = cancelToken.source();
     (async () => {
-      const data = await fetchSeq(text, source.token);
-      setRes(data);
+      try {
+        const data = await fetchSeq(text);
+        setRes(data);
+      } catch (error) {}
     })();
-    return () => {
-      source.cancel();
-    };
   }, [text]);
 
   return (
